@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falling ball</title>
+<style>
+  :root { --bg: #f6f3ec; --ink: #2b2a27; --ball: #d0563b; --floor: #8a8478; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1d1c1a; --ink: #ece8df; --ball: #e36b4f; --floor: #6d685f; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px system-ui, sans-serif; }
+  canvas { display: block; width: 100%; aspect-ratio: 8 / 5; }
+  .bar { display: flex; gap: 8px; align-items: center; padding: 8px 16px; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Balls falling onto a floor"></canvas>
+<div class="bar">
+  <button id="drop">Drop a ball</button>
+  <button id="clear">Clear</button>
+  <span id="meter">0 balls</span>
+</div>
+<script>
+(function () {
+  const W = 800, H = 500, FLOOR = 440, R = 18, G = 1800;
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = getComputedStyle(document.documentElement);
+  const color = n => css.getPropertyValue(n).trim();
+  let balls = [], last = performance.now(), dropped = 0;
+
+  function fit() {
+    const r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+    ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+  }
+
+  function step(dt) {
+    for (const b of balls) {
+      if (b.rest) continue;
+      b.vy += G * dt; b.y += b.vy * dt;
+      if (b.y > FLOOR - R) {
+        b.y = FLOOR - R;
+        b.vy = -b.vy * 0.5;
+        if (Math.abs(b.vy) < 60) { b.vy = 0; b.rest = true; }
+      }
+    }
+  }
+
+  function draw() {
+    ctx.fillStyle = color('--bg'); ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = color('--floor'); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, FLOOR); ctx.lineTo(W, FLOOR); ctx.stroke();
+    for (const b of balls) {
+      ctx.save(); ctx.translate(b.x, b.y);
+      ctx.fillStyle = color('--ball');
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    document.getElementById('meter').textContent = balls.length + (balls.length === 1 ? ' ball' : ' balls');
+  }
+
+  function loop(t) {
+    step(Math.min(0.05, (t - last) / 1000)); last = t;
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById('drop').addEventListener('click', () => {
+    dropped++;
+    const x = 60 + (dropped * 137) % (W - 120);
+    balls.push(reduce ? { x, y: FLOOR - R, vy: 0, rest: true } : { x, y: 40, vy: 0, rest: false });
+    if (reduce) draw();
+  });
+  document.getElementById('clear').addEventListener('click', () => { balls = []; draw(); });
+  window.addEventListener('resize', () => { fit(); draw(); });
+
+  fit();
+  if (reduce) draw(); else requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
