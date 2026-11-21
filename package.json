@@ -1,6 +1,6 @@
 {
   "name": "canvas-spy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Test a <canvas> page by asking what it drew and where: fake 2D context, fake clock, small DOM, mutation runner. Zero dependencies.",
   "main": "src/index.js",
   "bin": { "canvas-spy-mutate": "bin/canvas-spy-mutate.js" },

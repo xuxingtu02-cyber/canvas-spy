@@ -116,6 +116,17 @@ test('runner: a mutation whose anchor is gone never counts as caught, exit 1', (
   assert.match(r.stdout, /1 caught, 0 survived, 1 never ran/);
 });
 
+test('runner: says which check caught each mutant, and says so when none is named', () => {
+  const r = runner(`const p = loadPage('p.html', { mutations: [['x += 1;', 'x += 2;'], ['x += 1;', 'x += 3;']] });
+    const a = p.frame(); const ok = a[0].box.x === 1;
+    if (process.env.CANVAS_SPY_MUTANT === '2') process.exit(ok ? 0 : 7);
+    console.log('✓ drawn'); console.log((ok ? '✓ ' : '✗ ') + 'x moved by one'); console.log('✗ not a real failure line, printed after');
+    process.exit(ok ? 0 : 1);`);
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /mutant 1: caught by default\n\s+↳ ✗ x moved by one\n/);
+  assert.match(r.stdout, /mutant 2: caught by default\n\s+↳ \(no failed-check line in the output; it failed some other way, exit 7\)/);
+});
+
 test('runner: refuses to start when the unmutated test already fails', () => {
   const r = runner(`loadPage('p.html', { mutations: [['x += 1;', 'x += 2;']] }); process.exit(1);`);
   assert.equal(r.status, 1);

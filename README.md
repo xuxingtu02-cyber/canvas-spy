@@ -77,15 +77,19 @@ loadPage('ball.html', { mutations: [
 $ npx canvas-spy-mutate --env REDUCE=1 -- node ball.test.js
 ✓ unmutated: passes in default / REDUCE=1
 ✓ mutant 1: caught by default
+    ↳ ✗ no ball below the floor while falling (deepest edge 457.9, floor 440)
 ✓ mutant 2: caught by default
+    ↳ ✗ every ball rests on the floor: 141.1 73.6 39.3
 ...
 ✓ mutant 4: caught by REDUCE=1
+    ↳ ✗ every ball rests on the floor: 40.0 40.0 40.0
 6 mutants: 6 caught, 0 survived, 0 never ran
 ```
 
 - It runs your test once per mutation (`CANVAS_SPY_MUTANT=k`). Your test must exit non-zero when it fails.
 - `--env` adds another environment to run every mutant in. A mutant counts as caught if any environment fails on it. Some bugs only exist in one mode: an animation that flies upward can't be seen when reduced motion makes it land instantly.
 - **A mutation whose text isn't in the page is reported as "never ran", not "caught".** That's the trap this exists for: rename a variable in the page, the mutation silently stops applying, the test still fails for some other reason, and you count a catch that never happened.
+- Under each caught mutant it prints the first failed check from your test's output (a line starting with `✗`, `✖`, `not ok` or `FAIL`). Read down that column: a check you wrote that never appears there may not be doing anything. All mutants caught does not mean every check works; one check can be catching everything while another passes no matter what.
 - It refuses to start if the test fails without any mutation.
 
 ## Example
