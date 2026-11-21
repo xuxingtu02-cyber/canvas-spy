@@ -121,3 +121,22 @@ test('runner: refuses to start when the unmutated test already fails', () => {
   assert.equal(r.status, 1);
   assert.match(r.stdout, /unmutated run fails/);
 });
+
+test('local <link rel=stylesheet> supplies CSS variables; remote ones are skipped; unknown variables warn', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'canvas-spy-css-'));
+  fs.writeFileSync(path.join(dir, 'site.css'), ':root { --ink: #123456; }');
+  fs.writeFileSync(path.join(dir, 'p.html'), `<link rel="stylesheet" href="https://fonts.example/x.css"><link rel="stylesheet" href="site.css">
+    <p id="o"></p><script>const s = getComputedStyle(document.documentElement);
+    document.getElementById('o').textContent = s.getPropertyValue('--ink') + '|' + s.getPropertyValue('--nope');</script>`);
+  const warned = [];
+  const orig = console.warn; console.warn = m => warned.push(m);
+  try {
+    const p = loadPage(path.join(dir, 'p.html'));
+    assert.equal(p.text('o'), '#123456|');
+    assert.deepEqual([...p.cssMisses], ['--nope']);
+    assert.equal(warned.length, 1);
+    assert.match(warned[0], /--nope/);
+  } finally { console.warn = orig; }
+  fs.writeFileSync(path.join(dir, 'q.html'), '<link rel="stylesheet" href="missing.css">');
+  assert.throws(() => loadPage(path.join(dir, 'q.html')), /missing\.css/);
+});

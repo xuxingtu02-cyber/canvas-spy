@@ -14,7 +14,7 @@ assert(balls.every(b => origin(b).y === 422));    // every ball came to rest on 
 
 - **What it does.** Loads your HTML page in Node with a small fake browser and runs its scripts. The 2D context records every paint (fill, stroke, fillRect, fillText, drawImage) with the colour, alpha, dash and transform in force, and the points it covered in canvas pixels. Time is fake: you move `performance.now()` and animation frames by hand, so "the frame 1.3 s after the click" is a line of test code.
 - **What you need.** Node 18+ (written for 18's `node:test`; so far only run on Node 26). No dependencies, no browser, no build step. Pages should be self-contained (inline scripts, local `<script src>`); anything from a CDN you pass in as a string.
-- **What it costs you.** It is not a browser. No layout (elements report whatever size you give them), no CSS cascade (it reads `--custom-properties` from your `<style>`, nothing else), no pixels. Curves are kept as bounding points, so "is the ball above the floor" works and "is this pixel red" does not. If your page needs real layout or WebGL, use a real browser.
+- **What it costs you.** It is not a browser. No layout (elements report whatever size you give them), no CSS cascade (it reads `--custom-properties` from your `<style>` and local `<link rel=stylesheet>` files, nothing else, and warns when the page asks for one nobody defines), no pixels. Curves are kept as bounding points, so "is the ball above the floor" works and "is this pixel red" does not. If your page needs real layout or WebGL, use a real browser.
 
 It also ships a **mutation runner**: you list a few ways to break the page, and it checks that your test notices each one.
 
@@ -38,6 +38,7 @@ The other thing the copies taught me: **a test that passes proves little until y
 | `expose` | — | `{ 'text in your script': 'expression' }` → `page.exposed`. Reach a closure variable without changing the page. |
 | `mutations` | — | `[[find, replace], ...]`, used by the mutation runner |
 | `scripts` | — | `{ 'https://cdn/x.js': 'code' }` for scripts that aren't on disk |
+| `styles` | — | same for stylesheets |
 | `strictFinite` | `true` | throw when the page passes `NaN`/`Infinity` to the canvas (a browser silently draws nothing) |
 
 Returns a `page`:
@@ -47,7 +48,7 @@ Returns a `page`:
 - `page.capture(fn)` returns the ops drawn while `fn` runs. Use it when nothing animates, e.g. in reduced motion.
 - `page.click(target, x?, y?)`, `page.pointer(target, type, x, y)`, `page.drag(target, from, to)`, `page.input(target, value)`, `page.key(key)`, `page.fire(target, type, init)`, `page.resize(w, h)`.
 - `page.text(id)`, `page.el(idOrSelector)`, `page.$$(selector)`, `page.canvas(id?)` (the recorder: `.ops`, `.calls`).
-- `page.clock`, `page.window`, `page.document`, `page.cssVars`, `page.exposed`.
+- `page.clock`, `page.window`, `page.document`, `page.cssVars`, `page.cssMisses` (variables the page asked for that nobody defined), `page.exposed`.
 
 Targets are an id (`'drop'`), a selector (`'#why button'`) or an element.
 
