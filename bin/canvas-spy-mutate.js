@@ -10,7 +10,7 @@
 // reduced-motion pass); a mutant counts as caught if any environment fails on it.
 //
 // For each caught mutant it also prints the first failing check it finds in the test's
-// output (a line starting with ✗, ✖, "not ok" or FAIL), so you can see *which* check
+// output (a line starting with ✗, ✖, "not ok" or FAIL) and how many more failed, so you can see *which* check
 // caught it: a check that never shows up there may not be doing anything.
 //
 // Exit 0 only if the test passes unmutated in every environment, every mutant is
@@ -38,10 +38,10 @@ function parseArgs(argv) {
 const FAILED_LINE = /^\s*(✗|✖|not ok\b|FAIL\b)/;
 /** The first line of a test's output that looks like a failed check, trimmed. */
 function firstFailure(out) {
-  const line = out.split('\n').find(l => FAILED_LINE.test(l));
-  if (!line) return null;
-  const t = line.trim();
-  return t.length > 110 ? t.slice(0, 107) + '...' : t;
+  const lines = out.split('\n').filter(l => FAILED_LINE.test(l));
+  if (!lines.length) return null;
+  const t = lines[0].trim();
+  return (t.length > 110 ? t.slice(0, 107) + '...' : t) + (lines.length > 1 ? `  (+${lines.length - 1} more)` : '');
 }
 
 const label = e => Object.keys(e).length ? Object.entries(e).map(([k, v]) => `${k}=${v}`).join(',') : 'default';

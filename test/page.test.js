@@ -123,7 +123,7 @@ test('runner: says which check caught each mutant, and says so when none is name
     console.log('✓ drawn'); console.log((ok ? '✓ ' : '✗ ') + 'x moved by one'); console.log('✗ not a real failure line, printed after');
     process.exit(ok ? 0 : 1);`);
   assert.equal(r.status, 0, r.stdout);
-  assert.match(r.stdout, /mutant 1: caught by default\n\s+↳ ✗ x moved by one\n/);
+  assert.match(r.stdout, /mutant 1: caught by default\n\s+↳ ✗ x moved by one  \(\+1 more\)\n/);
   assert.match(r.stdout, /mutant 2: caught by default\n\s+↳ \(no failed-check line in the output; it failed some other way, exit 7\)/);
 });
 
