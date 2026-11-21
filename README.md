@@ -20,7 +20,7 @@ It also ships a **mutation runner**: you list a few ways to break the page, and 
 
 ## Why
 
-I make small animated pages (Slow Cities: one per city in Calvino's *Invisible Cities*). Each has a test. After the first few I noticed the same three pieces copied into every test file: a fake canvas that logs calls, a fake clock, and a loop that reads "a thing is a `translate` followed by a fill in its colour". Twenty-two copies, each slightly different. This is those pieces, written once and tested.
+I make small animated pages ([Slow Cities](https://github.com/scarlett-alt22/slow-cities), one per city in Calvino's *Invisible Cities*). Each has a test. After the first few I noticed the same three pieces copied into every test file: a fake canvas that logs calls, a fake clock, and a loop that reads "a thing is a `translate` followed by a fill in its colour". Twenty-two copies, each slightly different. This is those pieces, written once and tested.
 
 The other thing the copies taught me: **a test that passes proves little until you've seen it fail.** My tests regularly checked less than their descriptions claimed. So the mutation runner is part of the library, not an afterthought.
 
