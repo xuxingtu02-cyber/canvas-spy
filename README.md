@@ -46,7 +46,7 @@ Returns a `page`:
 - `page.frame(ms?)` advances time by `ms` (default 1/60 s), runs due timers and the waiting animation frames, and returns the paint ops drawn meanwhile.
 - `page.run(ms, step?)` runs frames for `ms`; returns the last frame's ops.
 - `page.capture(fn)` returns the ops drawn while `fn` runs. Use it when nothing animates, e.g. in reduced motion.
-- `page.click(target, x?, y?)`, `page.pointer(target, type, x, y)`, `page.drag(target, from, to)`, `page.input(target, value)`, `page.key(key)`, `page.fire(target, type, init)`, `page.resize(w, h)`.
+- `page.click(target, x?, y?)`, `page.pointer(target, type, x, y)`, `page.drag(target, from, to)`, `page.input(target, value)`, `page.key(key)`, `page.fire(target, type, init)`, `page.resize(w, h)`. `page.click` on a disabled button, input, select or textarea (or one inside a disabled `<fieldset>`) does nothing and returns `false`, as in a browser.
 - `page.text(id)`, `page.el(idOrSelector)`, `page.$$(selector)`, `page.canvas(id?)` (the recorder: `.ops`, `.calls`).
 - `page.clock`, `page.window`, `page.document`, `page.cssVars`, `page.cssMisses` (variables the page asked for that nobody defined), `page.exposed`.
 

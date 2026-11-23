@@ -42,6 +42,29 @@ test('builds the tree, runs the script, events bubble to a delegated listener', 
   assert.throws(() => p.el('nope'), /no element/);
 });
 
+test('click on a disabled control does nothing, like a browser', () => {
+  const p = loadPage(PAGE, { expose: { 'let x = 0, clicks = 0;': '{ get clicks() { return clicks; } }' } });
+  const [a, b] = p.$$('#why button');
+  a.disabled = true;
+  assert.equal(p.click(a), false);
+  assert.equal(p.exposed.clicks, 0);
+  b.setAttribute('disabled', '');
+  p.click(b);
+  assert.equal(p.exposed.clicks, 0);
+  a.disabled = false;
+  p.click(a);
+  assert.equal(p.exposed.clicks, 1);
+  // a disabled fieldset disables what is inside it; a plain disabled <div> is not a control
+  const fs = p.document.createElement('fieldset'); fs.disabled = true;
+  const inner = p.document.createElement('button'); fs.appendChild(inner);
+  p.document.getElementById('why').appendChild(fs);
+  p.click(inner);
+  assert.equal(p.exposed.clicks, 1);
+  const div = p.document.getElementById('why'); div.setAttribute('disabled', '');
+  p.click(div);
+  assert.equal(p.exposed.clicks, 2);
+});
+
 test('inputs: value from markup, input events', () => {
   const p = loadPage(PAGE);
   assert.equal(p.el('s').value, '3');
